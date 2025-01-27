@@ -9,14 +9,13 @@ import (
 )
 
 type Cache struct {
-	geo *rtree.Index
-	ts  *timestamp.Index
-
-	cache *ristretto.Cache[string, Location]
+	geoIdx *rtree.Index
+	tsIdx  *timestamp.Index
+	store  *ristretto.Cache[string, Location]
 }
 
-func NewCache(geo *rtree.Index, ts *timestamp.Index) (*Cache, error) {
-	cache, err := ristretto.NewCache(&ristretto.Config[string, Location]{
+func NewCache(geoIdx *rtree.Index, tsIdx *timestamp.Index) (*Cache, error) {
+	store, err := ristretto.NewCache(&ristretto.Config[string, Location]{
 		NumCounters: 1e7,     // number of keys to track frequency of (10M).
 		MaxCost:     1 << 30, // maximum cost of cache (1GB).
 		BufferItems: 64,      // number of keys per Get buffer.
@@ -24,7 +23,7 @@ func NewCache(geo *rtree.Index, ts *timestamp.Index) (*Cache, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Cache{cache: cache, geo: geo, ts: ts}, nil
+	return &Cache{store: store, geoIdx: geoIdx, tsIdx: tsIdx}, nil
 }
 
 func (c *Cache) Get(loc Location, radius float64, limit int) []Location {
@@ -34,31 +33,31 @@ func (c *Cache) Get(loc Location, radius float64, limit int) []Location {
 		to   = Timestamp(now.UTC().Unix())
 	)
 
-	loc1 := c.ts.Read(from, to)
+	loc1 := c.tsIdx.Read(from, to)
 
-	loc2 := c.geo.Nearby(loc, radius, limit)
+	loc2 := c.geoIdx.Nearby(loc, radius, limit)
 
 	if len(loc1) == 0 || len(loc2) == 0 {
 		return []Location{}
 	}
 
 	if len(loc1) > len(loc2) {
-		return intersect(loc1, loc2)
+		return intersect(loc2, loc1)
 	}
 
-	return intersect(loc2, loc1)
+	return intersect(loc1, loc2)
 }
 
 func (c *Cache) Set(loc Location) {
-	c.geo.Add(loc)
-	c.ts.Add(loc)
-	c.cache.Set(loc.Name.String(), loc, 1)
+	c.geoIdx.Add(loc)
+	c.tsIdx.Add(loc)
+	c.store.Set(loc.Name.String(), loc, 1)
 }
 
 func (c *Cache) Del(loc Location) {
-	c.geo.Remove(loc)
-	c.ts.Add(loc)
-	c.cache.Del(loc.Name.String())
+	c.geoIdx.Remove(loc)
+	c.tsIdx.Add(loc)
+	c.store.Del(loc.Name.String())
 }
 
 func intersect(self, other []Location) []Location {
