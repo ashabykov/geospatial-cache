@@ -27,7 +27,7 @@ func NewCache(geo *rtree.Index, ts *timestamp.Index) (*Cache, error) {
 	return &Cache{cache: cache, geo: geo, ts: ts}, nil
 }
 
-func (c *Cache) Find(loc Location, radius float64, limit int) []Location {
+func (c *Cache) Get(loc Location, radius float64, limit int) []Location {
 	var (
 		now  = time.Now()
 		from = Timestamp(now.UTC().Add(-20 * time.Minute).Unix())
@@ -43,13 +43,13 @@ func (c *Cache) Find(loc Location, radius float64, limit int) []Location {
 	}
 
 	if len(loc1) > len(loc2) {
-		return merge(loc1, loc2)
+		return intersect(loc1, loc2)
 	}
 
-	return merge(loc2, loc1)
+	return intersect(loc2, loc1)
 }
 
-func (c *Cache) Add(loc Location) {
+func (c *Cache) Set(loc Location) {
 	c.geo.Add(loc)
 	c.ts.Add(loc)
 	c.cache.Set(loc.Name.String(), loc, 1)
@@ -61,6 +61,7 @@ func (c *Cache) Del(loc Location) {
 	c.cache.Del(loc.Name.String())
 }
 
-func merge(self, other []Location) []Location {
-	return nil
+func intersect(self, other []Location) []Location {
+	// TODO: impl
+	return self
 }
