@@ -1,11 +1,12 @@
 package geospatial_cache
 
 import (
-	"github.com/dgraph-io/ristretto/v2"
 	"time"
 
-	"geospatial-cache/rtree"
-	"geospatial-cache/timestamp"
+	"github.com/dgraph-io/ristretto/v2"
+
+	"github.com/ashabykov/geospatial-cache/rtree"
+	"github.com/ashabykov/geospatial-cache/timestamp"
 )
 
 type Cache struct {

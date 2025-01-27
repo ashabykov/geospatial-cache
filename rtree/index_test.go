@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	geospatial "geospatial-cache"
+	geospatial "github.com/ashabykov/geospatial-cache"
 )
 
 func TestIndex_Nearby(t *testing.T) {

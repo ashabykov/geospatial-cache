@@ -3,10 +3,11 @@
 package timestamp
 
 import (
-	"github.com/wangjia184/sortedset"
 	"sync"
 
-	geospatial "geospatial-cache"
+	"github.com/wangjia184/sortedset"
+
+	geospatial "github.com/ashabykov/geospatial-cache"
 )
 
 type Index struct {

@@ -1,4 +1,4 @@
-module geospatial-cache
+module github.com/ashabykov/geospatial-cache
 
 go 1.23.2
 

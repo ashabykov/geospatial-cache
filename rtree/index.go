@@ -3,10 +3,11 @@
 package rtree
 
 import (
-	"github.com/tidwall/rtree"
 	"time"
 
-	geospatial "geospatial-cache"
+	"github.com/tidwall/rtree"
+
+	geospatial "github.com/ashabykov/geospatial-cache"
 )
 
 type Index struct {
